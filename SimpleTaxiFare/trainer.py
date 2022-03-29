@@ -14,14 +14,14 @@ import joblib
 
 ### GCP Storage - - - - - - - - - - - - - - - - - - - - - -
 
-BUCKET_NAME = 'wagon-data-662-domagalski'
+BUCKET_NAME = "wagon-data-835-domagalski"
 
 ##### Data  - - - - - - - - - - - - - - - - - - - - - - - -
 
 # train data file location
 # /!\ here you need to decide if you are going to train using the provided and uploaded data/train_1k.csv sample file
 # or if you want to use the full dataset (you need need to upload it first of course)
-BUCKET_TRAIN_DATA_PATH = 'data/train_1k.csv'
+BUCKET_TRAIN_DATA_PATH = "data/train_1k.csv"
 
 ##### Training  - - - - - - - - - - - - - - - - - - - - - -
 
@@ -30,10 +30,10 @@ BUCKET_TRAIN_DATA_PATH = 'data/train_1k.csv'
 ##### Model - - - - - - - - - - - - - - - - - - - - - - - -
 
 # model folder name (will contain the folders for all trained model versions)
-MODEL_NAME = 'taxifare'
+MODEL_NAME = "taxifare"
 
 # model version folder name (where the trained model.joblib file will be stored)
-MODEL_VERSION = 'v1'
+MODEL_VERSION = "v1"
 
 ### GCP AI Platform - - - - - - - - - - - - - - - - - - - -
 
@@ -42,24 +42,32 @@ MODEL_VERSION = 'v1'
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-
 def get_data():
     """method to get the training data (or a portion of it) from google cloud bucket"""
     df = pd.read_csv(f"gs://{BUCKET_NAME}/{BUCKET_TRAIN_DATA_PATH}", nrows=1000)
     return df
 
 
-def compute_distance(df,
-                     start_lat="pickup_latitude",
-                     start_lon="pickup_longitude",
-                     end_lat="dropoff_latitude",
-                     end_lon="dropoff_longitude"):
-    lat_1_rad, lon_1_rad = np.radians(df[start_lat].astype(float)), np.radians(df[start_lon].astype(float))
-    lat_2_rad, lon_2_rad = np.radians(df[end_lat].astype(float)), np.radians(df[end_lon].astype(float))
+def compute_distance(
+    df,
+    start_lat="pickup_latitude",
+    start_lon="pickup_longitude",
+    end_lat="dropoff_latitude",
+    end_lon="dropoff_longitude",
+):
+    lat_1_rad, lon_1_rad = np.radians(df[start_lat].astype(float)), np.radians(
+        df[start_lon].astype(float)
+    )
+    lat_2_rad, lon_2_rad = np.radians(df[end_lat].astype(float)), np.radians(
+        df[end_lon].astype(float)
+    )
     dlon = lon_2_rad - lon_1_rad
     dlat = lat_2_rad - lat_1_rad
 
-    a = np.sin(dlat / 2.0) ** 2 + np.cos(lat_1_rad) * np.cos(lat_2_rad) * np.sin(dlon / 2.0) ** 2
+    a = (
+        np.sin(dlat / 2.0) ** 2
+        + np.cos(lat_1_rad) * np.cos(lat_2_rad) * np.sin(dlon / 2.0) ** 2
+    )
     c = 2 * np.arcsin(np.sqrt(a))
     return 6371 * c
 
@@ -80,11 +88,10 @@ def train_model(X_train, y_train):
     return rgs
 
 
-STORAGE_LOCATION = 'models/simpletaxifare/model.joblib'
+STORAGE_LOCATION = "models/simpletaxifare/model.joblib"
 
 
 def upload_model_to_gcp():
-
 
     client = storage.Client()
 
@@ -92,7 +99,7 @@ def upload_model_to_gcp():
 
     blob = bucket.blob(STORAGE_LOCATION)
 
-    blob.upload_from_filename('model.joblib')
+    blob.upload_from_filename("model.joblib")
 
 
 def save_model(reg):
@@ -101,7 +108,7 @@ def save_model(reg):
 
     # saving the trained model to disk is mandatory to then beeing able to upload it to storage
     # Implement here
-    joblib.dump(reg, 'model.joblib')
+    joblib.dump(reg, "model.joblib")
     print("saved model.joblib locally")
 
     # Implement here
@@ -109,7 +116,7 @@ def save_model(reg):
     print(f"uploaded model.joblib to gcp cloud storage under \n => {STORAGE_LOCATION}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # get training data from GCP bucket
     df = get_data()
 

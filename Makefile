@@ -8,7 +8,7 @@
 
 ### GCP Storage - - - - - - - - - - - - - - - - - - - - - -
 
-BUCKET_NAME=wagon-data-662-domagalski
+BUCKET_NAME=wagon-data-835-domagalski
 
 ##### Data  - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -31,7 +31,7 @@ REGION=europe-west1
 
 PYTHON_VERSION=3.7
 FRAMEWORK=scikit-learn
-RUNTIME_VERSION=1.15
+RUNTIME_VERSION=2.2
 
 ##### Package params  - - - - - - - - - - - - - - - - - - -
 
@@ -62,3 +62,24 @@ clean:
 	@rm -fr */__pycache__ __pycache__
 	@rm -fr build dist *.dist-info *.egg-info
 	@rm -fr */*.pyc
+
+REGION=europe-west1
+
+PYTHON_VERSION=3.7
+FRAMEWORK=scikit-learn
+RUNTIME_VERSION=1.15
+
+PACKAGE_NAME=SimpleTaxiFare
+FILENAME=trainer
+
+JOB_NAME=taxi_fare_training_pipeline_$(shell date +'%Y%m%d_%H%M%S')
+
+gcp_submit_training:
+	@gcloud ai-platform jobs submit training ${JOB_NAME} \
+		--job-dir gs://${BUCKET_NAME}/${BUCKET_TRAINING_FOLDER}  \
+		--package-path ${PACKAGE_NAME} \
+		--module-name ${PACKAGE_NAME}.${FILENAME} \
+		--python-version=${PYTHON_VERSION} \
+		--runtime-version=${RUNTIME_VERSION} \
+		--region ${REGION} \
+		--stream-logs
